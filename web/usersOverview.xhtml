@@ -1,0 +1,108 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core">
+    <h:head>
+        <title>Facelet Title</title>
+    </h:head>
+    <h:body>
+        <ui:composition template="master.xhtml">
+            <ui:define name="pagetitle">Pregled korisnika</ui:define>
+
+            <ui:define name="sredina">
+                <h1>Pregled korisnika</h1>
+                #{userControl.gatherAllUsersData()}
+
+                <p:breadCrumb>  
+                    <p:menuitem value="Home" url="/faces/index.xhtml" />
+                    <p:menuitem value="Pregled korisnika" url="/faces/usersOverview.xhtml" />
+                </p:breadCrumb> 
+                
+                <p:dialog modal="true" widgetVar="statusDialog" header="Status"   
+                          draggable="false" closable="false" >  
+                    <p:graphicImage value="/resources/images/ajaxloadingbar.gif" />  
+                </p:dialog> 
+                <h:form id="form">
+                    
+                    <p:growl id="growl" showDetail="true"/>
+
+                    <p:dataTable id="users" var="u" value="#{userControl.model}" paginator="true" rows="10"
+                             selection="#{userControl.selectedUser}" selectionMode="single" widgetVar="usersTable" filteredValue="#{userManage.svikorisnici}">
+
+                        <f:facet name="header">  
+                            <p:outputPanel>  
+                                <h:outputText value="Pretraga:" />  
+                                <p:inputText id="globalFilter" onkeyup="usersTable.filter()" style="width:150px" />  
+                            </p:outputPanel>  
+                        </f:facet>  
+                        <p:ajax event="rowSelect" update=":form:display " oncomplete="infoDialog.show()" />
+
+                        <p:column headerText="Korisničko ime" filterMatchMode="contains" filterBy="#{u.username}" filterStyle="display:none">
+                            #{u.username}
+                        </p:column>
+
+                        <p:column headerText="Ime" filterMatchMode="contains" filterBy="#{u.firstName}" filterStyle="display:none">
+                            #{u.firstName}
+                        </p:column>
+
+                        <p:column headerText="Prezime" filterMatchMode="contains" filterBy="#{u.lastName}" filterStyle="display:none">
+                            #{u.lastName}
+                        </p:column>
+
+                        <p:column headerText="Email" filterMatchMode="contains" filterBy="#{u.email}" filterStyle="display:none">
+                            #{u.email}
+                        </p:column>
+                    </p:dataTable>
+
+                    <p:dialog id="dialog" header="Detalji korisnika" widgetVar="infoDialog" resizable="false"
+                              showEffect="fade" modal="true">
+
+                        <h:panelGrid id="display" columns="2" cellpadding="4">
+
+
+                            <h:outputText value="Korisničko ime:" />
+                            <h:outputText value="#{userControl.selectedUser.username}" />
+
+                            <h:outputText value="Ime:" />
+                            <h:outputText value="#{userControl.selectedUser.firstName}" />
+
+                            <h:outputText value="Prezime:" />
+                            <h:outputText value="#{userControl.selectedUser.lastName}" />
+
+                            <h:outputText value="Email:" />
+                            <h:outputText value="#{userControl.selectedUser.email}" />
+
+                            <h:outputText value="Telefon" />
+                            <h:outputText value="#{userControl.selectedUser.telephone}" />
+
+                            <h:outputText value="Adresa:" />
+                            <h:outputText value="#{userControl.selectedUser.address}" />
+
+                            <h:outputText value="Grad:" />
+                            <h:outputText value="#{userControl.selectedUser.city}" />
+
+                            <p:outputLabel for="som" value="Tip korisnika:" />
+                            <p:selectOneMenu id="som" value="#{userControl.selectedUser.type}">  
+                                <f:selectItem itemLabel="Odaberite jedno" itemValue="" />  
+                                <f:selectItem itemLabel="Registrovani korisnik" itemValue="0" />  
+                                <f:selectItem itemLabel="Moderator" itemValue="1" />  
+                                <f:selectItem itemLabel="Administrator" itemValue="2" />  
+                                <p:ajax event="change" update=":form:display" />
+                            </p:selectOneMenu> 
+                          
+                            <p:commandButton icon="ui-icon-disk" value="Promeni" action="#{userControl.updateUserData()}" oncomplete="infoDialog.hide()" update="@all"/>
+                            <p:commandButton icon="ui-icon-cancel" value="Obriši" action="#{userControl.deleteSelectedUser()}" oncomplete="infoDialog.hide()" update="@all"/>
+                        </h:panelGrid>
+                    </p:dialog>
+
+                </h:form>
+
+
+            </ui:define>
+        </ui:composition>
+    </h:body>
+</html>
+

@@ -1,0 +1,105 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <h:head>
+        <title>Facelet Title</title>
+    </h:head>
+    <h:body>
+        <ui:composition template="master.xhtml">
+            <ui:define name="pagetitle">Dodaj dogadjaj</ui:define>
+            <ui:define name="sredina">
+
+                <p:breadCrumb>  
+                    <p:menuitem value="Home" url="/faces/index.xhtml" />
+                    <p:menuitem value="Dodaj dogadjaj" url="/faces/addEvent.xhtml" />
+                </p:breadCrumb>
+
+                <h1>Dodaj dogadjaj</h1>
+                
+                <h:form id="form">
+                    
+                    #{eventControl.newEventsCategories.clear()}
+
+                    <p:messages id="messages" showDetail="false" autoUpdate="true" />  
+
+                    <h:panelGrid columns="2" cellpadding="5">  
+                        <h:outputLabel for="event" value="Naziv dogadjaja:"/>
+                        <p:inputText id="event" value="#{eventControl.newEvent.title}" required="true" requiredMessage="Naziv dogadjaja je obavezan"/>
+
+                        <h:outputLabel for="calendar" value="Datum i vreme odrzavanja:"/>
+                        <p:calendar id="calendar" value="#{eventControl.calendarValue}" pattern="dd.MM.yyyy hh:mm"
+                                    required="true" requiredMessage="Datum i vreme odrzavanja su neophodni" >
+                            <p:ajax event="dateSelect" update=":form:calendar2" />
+                        </p:calendar>
+
+                        <h:outputLabel for="calendar2" value="Mogucnost rezervisanja do:"/>
+                        <p:calendar id="calendar2" value="#{eventControl.calendarReservationValue}" pattern="dd.MM.yyyy hh:mm"/>
+
+                        <h:outputLabel for="maxreservations" value="Maximalno rezervacija po korisniku:"/>
+                        <p:inputText id="maxreservations" value="#{eventControl.newEvent.maxReservations}" />
+                   
+                    </h:panelGrid>
+                    
+                    <br></br>
+                    <h3>Dodaj kategoriju</h3>
+                    <p:commandButton value="Dodaj" action="#{eventControl.addCategory()}" 
+                                         immediate="true" update=":form:categories" />
+                    
+                    <h:dataTable id="categories" value="#{eventControl.newEventsCategories}" var="c">
+                        <h:column>
+                            <f:facet name="header">Naziv kategorije</f:facet>
+                            <p:inputText value="#{c.name}" />
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Broj karata</f:facet>
+                            <p:inputText value="#{c.size}" />
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Cena karte</f:facet>
+                            <p:inputText value="#{c.ticketPrice}" />
+                        </h:column>
+                    </h:dataTable>
+                    
+                    <br></br>
+                    <h4>Dodaci</h4>
+                    
+                    <h:panelGrid columns="2">
+                        
+                        <p:outputLabel for="textarea" value="Opis" />
+                        <p:outputLabel />
+                        <p:inputTextarea id="textarea" cols="30" rows="6" value="#{eventControl.newEvent.description}"/>
+                        <p:outputLabel />
+
+                        <h:outputLabel value="Priloženi fajlovi: "/>
+                        <p:fileUpload fileUploadListener="#{eventControl.handleFileUpload}"  
+                                      mode="advanced"  
+                                      update=":form:messages,files"  
+                                      auto="false"  
+                                      invalidFileMessage="Pogrešan tip fajla"
+                                      invalidSizeMessage="Maksimalna veličina fajla je 5MB"
+                                      multiple="true"
+                                      sizeLimit="5242880"   
+                                      allowTypes="/(\.|\/)(gif|jpe?g|png|pdf|doc|docx|ppt|pptx|pps|xls|xlsx|cvs|mp3|wav|wma|wmv|fla|mp4|avi|mpeg|mpg)$/"/>  
+
+                        <h:outputLabel />
+                        <p:dataList id="files" value="#{eventControl.newEvent.files}" var="f" itemType="disc">  
+                            <p:column>
+                                #{f.name} <p:commandLink value="[X]" action="#{eventControl.deleteFile(f)}" update="files" process="@this"/>
+                            </p:column>  
+
+                        </p:dataList>
+
+
+                    </h:panelGrid>
+
+                    <p:commandButton icon="ui-icon-check" value="Dodaj" action="#{eventControl.addEvent()}" type="submit" />  
+                </h:form> 
+            </ui:define>
+        </ui:composition>
+    </h:body>
+</html>
+

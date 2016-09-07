@@ -1,0 +1,19 @@
+Biblioteke:
+
+mysql-connector-java-5.1.23-bin : http://dev.mysql.com/downloads/connector/j/
+
+Prime Faces 3.4.2 :  http://primefaces.org/downloads.html
+
+PrimeFaces Bootstrap tema : http://repository.primefaces.org/org/primefaces/themes/bootstrap/1.0.9/
+
+Apache Common codec : http://commons.apache.org/codec/download_codec.cgi
+
+Apache common IO : http://commons.apache.org/io/download_io.cgi
+
+Apache common fileupload: http://commons.apache.org/fileupload/download_fileupload.cgi
+
+Testirano na:
+
+Glash Fish 3.1.2
+Java 1.7
+MySQL Community Server (GPL) - 5.5.25a

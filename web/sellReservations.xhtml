@@ -1,0 +1,55 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <h:head>
+        <title>Facelet Title</title>
+    </h:head>
+    <h:body>
+        <ui:composition template="master.xhtml">
+            <ui:define name="pagetitle">Prodaja rezervisanih ulaznica</ui:define>
+            <ui:define name="sredina">
+                
+                 <p:breadCrumb>  
+                        <p:menuitem value="Home" url="/faces/index.xhtml" />
+                        <p:menuitem value="Prodaja rezervisanih" url="/faces/sellTickets.xhtml" />
+                 </p:breadCrumb>
+
+                #{ticketsControl.gatherReservationData()}
+                
+                <h1>Prodaja ulaznica</h1>
+                <h:form id="form">
+                    
+                    <p:messages id="messages" showDetail="false" autoUpdate="true" />  
+                    
+                    <p:dataTable id="reservationsTable" var="reservation" value="#{ticketsControl.reservations}"
+                                 paginator="true" rows="10" >
+                    
+                        <p:column headerText="Korisnik">
+                            <h:outputText value="#{reservation.user}" />
+                        </p:column>
+                        
+                        <p:column headerText="Dogadjaj">
+                            <h:outputText value="#{reservation.eventTitle}" />
+                        </p:column>
+                        
+                        <p:column headerText="Broj ulaznica">
+                            <h:outputText value="#{reservation.tickets}" />
+                        </p:column>
+                        
+                        <p:column>
+                            <p:commandButton value="Prodaj" action="#{ticketsControl.sellTickets(reservation)}" 
+                                             update=":form:reservationsTable"/>
+                        </p:column>
+                        
+                    </p:dataTable>
+                    
+                </h:form> 
+            </ui:define>
+        </ui:composition>
+    </h:body>
+</html>
+

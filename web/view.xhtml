@@ -1,0 +1,286 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core">
+    <f:metadata>
+        <f:viewParam name="tip" value="#{browse.tip}" />
+        <f:viewParam name="vreme" value="#{browse.vreme}" />
+        <f:viewParam name="articleid" value="#{browse.articleId}" />
+        <f:viewParam name="categoryid" value="#{browse.catId}" />
+        <f:event listener="#{browse.preRender()}" type="preRenderView"/>
+    </f:metadata>
+    <h:head>
+        <title>Facelet Title</title>
+    </h:head>
+    <h:body>
+        <ui:composition template="master.xhtml">
+            <ui:define name="pagetitle">
+                <h:outputText value="#{browse.selectedCategory.name} " rendered="#{browse.selectedCategory ne null and browse.fullarticle eq null}"/>
+                <h:outputText value="#{browse.fullarticle.title}" rendered="#{browse.fullarticle ne null}"/>
+               
+                <h:outputText value="Pregled" rendered="#{browse.selectedCategory eq null and browse.fullarticle eq null}"/>
+                <h:outputText value=" popularno" 
+                              rendered="#{browse.tip eq 'popularno' and browse.selectedCategory eq null and browse.fullarticle eq null}"/>
+               <h:outputText value=" novo" 
+                              rendered="#{browse.tip eq 'novo' and browse.selectedCategory eq null and browse.fullarticle eq null}"/>
+             
+            
+            </ui:define>
+
+            <ui:define name="sredina">
+
+                <h:form>
+                    <p:breadCrumb model="#{browse.breadcrumbmodel}" >  
+
+                    </p:breadCrumb> 
+ <p:growl id="messages" showDetail="true"/> 
+ <h:panelGroup rendered="#{browse.tip eq 'popularno' and browse.fullarticle eq null}">
+     <h1>Popularno</h1>
+     <p:dataTable id="articles" var="a" value="#{browse.popularArticles}" paginator="true" rows="10"
+                                 widgetVar="articleTable" sortOrder="descending" sortBy="#{a.views}">
+                      
+                     
+
+                        <p:column headerText="Naslov" >
+                            <h:outputLink>
+                                <f:param name="categoryid" value="#{a.category.id}" />
+                                                         <f:param name="articleid" value="#{a.id}" />
+                                                        <f:param name="tip" value="#{browse.tip}" />
+                                                        #{a.title}
+                                        </h:outputLink>
+                        </p:column>
+
+                        <p:column headerText="Kategorija">
+                            #{a.category.name}
+                        </p:column>
+
+                      
+
+                        <p:column headerText="Čitanja">
+                            #{a.views}
+                        </p:column>
+                       
+                           
+                    </p:dataTable>
+ </h:panelGroup>
+ 
+ <h:panelGroup rendered="#{browse.tip eq 'novo' and browse.fullarticle eq null}">
+     <h1>Novo</h1>
+     <p:dataTable id="articlesn" var="a" value="#{browse.novoArticles}" paginator="true" rows="10"
+                  widgetVar="articleTable" sortOrder="descending" sortBy="#{a.id}">
+                      
+                     
+
+                        <p:column headerText="Naslov" >
+                            <h:outputLink>
+                                <f:param name="categoryid" value="#{a.category.id}" />
+                                                         <f:param name="articleid" value="#{a.id}" />
+                                                        <f:param name="tip" value="#{browse.tip}" />
+                                                        #{a.title}
+                                        </h:outputLink>
+                        </p:column>
+
+                        <p:column headerText="Kategorija">
+                            #{a.category.name}
+                        </p:column>
+
+                      
+
+                        <p:column headerText="Datum objave">
+                            <h:outputText value="#{a.created}">
+
+                                <f:convertDateTime pattern="dd.MM.yyyy" type="date" />
+                </h:outputText>
+                        </p:column>
+                       
+                           
+                    </p:dataTable>
+ </h:panelGroup>
+                    <h:panelGroup rendered="#{browse.fullarticle==null and browse.categories.size() gt 0 and browse.revision eq null}">
+                       
+                        <h1>#{browse.catId==0?'Kategorije':'Kategorije u'}
+                       #{browse.catId==0?'':browse.selectedCategory.name}</h1>
+                        <p:dataTable id="categories" var="c" value="#{browse.categories}" paginator="false" 
+                                 widgetVar="categoriesTable" >
+     
+                                <p:column>  
+                                <f:facet name="header">  
+                                    <h:outputText value="Naslov" style="text-align: left"/>  
+                                </f:facet>  
+                                        <h:outputLink>
+                                                        <f:param name="categoryid" value="#{c.id}" />
+                                                        <f:param name="tip" value="#{browse.tip}" />
+                                                         #{c.name}
+                                        </h:outputLink>
+                                </p:column>
+                             <p:column style="text-align: center;width: 150px">  
+                                <f:facet name="header" >  
+                                    <h:outputText value="Broj podkategorija" />  
+                                </f:facet>  
+                                 #{c.childs.size()}</p:column>
+
+
+                        </p:dataTable>
+                    </h:panelGroup>
+
+                    <h:panelGroup rendered="#{browse.fullarticle==null and  browse.articles.size() gt 0 and browse.revision eq null}"> 
+                      
+                       <h1>Članci u kategoriji #{browse.selectedCategory.name}</h1>
+                        <p:dataTable id="dataTable" var="a" value="#{browse.articles}"  
+                                     paginator="true" rows="100"  
+                                     paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  
+                                     rowsPerPageTemplate="50,100,150,200" >  
+
+
+                            <p:column sortBy="#{a.title}">  
+                                <f:facet name="header">  
+                                    <h:outputText value="Naslov" />  
+                                </f:facet>  
+                              
+                            
+                             <h:outputLink>
+                                 <f:param name="categoryid" value="#{browse.catId}" />
+                                                         <f:param name="articleid" value="#{a.id}" />
+                                                        <f:param name="tip" value="#{browse.tip}" />
+                                                        #{a.title}
+                                        </h:outputLink>
+                            </p:column>  
+
+                            <p:column style="width:110px !important" sortBy="#{a.rate}">  
+                                <f:facet name="header">  
+                                    <h:outputText value="Ocena" />  
+                                </f:facet>  
+                                <p:rating value="#{a.rate}" readonly="true" />     
+                            </p:column>  
+
+
+                        </p:dataTable>  
+                    </h:panelGroup>
+
+                    <h:panelGroup rendered="#{browse.fullarticle ne null and browse.revision eq null}">
+
+                        <h1>#{browse.fullarticle.title}</h1>
+                        <div class="text"><h:outputText value="#{browse.fullarticle.body}" escape="false"/></div>
+
+                        <h:panelGroup rendered="#{browse.fullarticle.files.size() gt 0}">
+                            <h3>Priloženi fajlovi</h3>
+                            <p:galleria value="#{browse.images()}" var="image" styleClass="ui-widget-content" style="margin: 0 auto"    panelWidth="600" panelHeight="350" rendered="#{browse.images().size()>0}" >  
+                                <p:graphicImage value="resources/uploads/#{image}" />  
+                            </p:galleria>
+                            <br/>
+
+
+                            <p:dataList value="#{browse.fullarticle.files}" var="f">
+                                <h:outputLink value="resources/uploads/#{f.path}" target="_blank">#{f.name}</h:outputLink>
+                            </p:dataList>
+
+                        </h:panelGroup>
+
+                        <h3>Tagovi</h3>
+                        <p:dataList value="#{browse.fullarticle.tags}" var="t">
+                            #{t.name}
+                        </p:dataList><br/>
+
+
+                        <h:panelGroup id="ocena" rendered="#{login.user.logged}">
+                            <h3>Oceni</h3>
+                          
+                            <p:rating id="rating" cancel="false" value="#{browse.myRate.score}" readonly="#{browse.myRate.score gt 0}">  
+                                <p:ajax event="rate" listener="#{browse.onrate}" update="ocena,messages" />  
+
+                            </p:rating>
+
+                            <br/>
+                            <h3>Funkcije</h3>
+
+                            <p:commandButton icon="ui-icon-cancel" value="Poništi glas" action="#{browse.oncancel()}" update="ocena,messages" rendered="#{browse.myRate.score gt 0}"/>
+                            <p:commandButton icon="ui-icon-pencil" value="Promeni članak" action="#{browse.redirectToEdit()}"/>
+                            <p:commandButton icon="ui-icon-document" value="Istorija izmena" action="#{browse.history()}" rendered="#{login.user.type gt 0}" update="@form"/>
+                            <p:commandButton icon="ui-icon-cancel" value="Obriši" action="#{browse.obrisi}" rendered="#{login.user.type gt 0}" update="@form"/>
+
+
+
+
+                        </h:panelGroup>
+
+
+                        <br/> <br/>
+                    </h:panelGroup>
+                    <h:panelGroup rendered="#{browse.revision ne null}">
+                        <h3>Statistika izmena</h3>
+                        <p:panelGrid columns="2">
+                            <h:outputLabel value="Naslov:"/>
+                            #{browse.fullarticle.title}
+                            <h:outputLabel value="Datum kreiranja:"/>
+                            <h:outputText value="#{browse.fullarticle.created}">
+
+                                <f:convertDateTime pattern="dd.MM.yyyy HH:mm" type="both" />
+                            </h:outputText>
+                            <h:outputLabel value="Autor:"/>
+                            <h:outputText value="#{browse.fullarticle.author.username}"/>
+
+
+                            <h:outputLabel value="Broj izmena:"/>
+                            #{browse.revision.size()}
+                            <h:outputLabel value="Broj pregleda:"/>
+                            #{browse.fullarticle.views}
+                            <h:outputLabel value="Broj unikatnih autora:"/>
+                            #{browse.uniqueAuthors()}
+
+                        </p:panelGrid>
+
+
+
+                        <h3>Istorija izmena</h3>                       
+
+
+                        <p:dataTable id="dataTable2" var="a" value="#{browse.revision}"  
+                                     paginator="true" rows="100"  
+                                     paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  
+                                     rowsPerPageTemplate="50,100,150,200" >  
+
+
+                            <p:column headerText="ID" >
+                                #{a.id}
+
+                            </p:column>
+
+                            <p:column headerText="Naslov" >
+                                #{a.title}
+
+                            </p:column>
+                            <p:column headerText="Vreme" >
+
+                                <h:outputText value="#{a.created}">
+
+                                    <f:convertDateTime pattern="dd.MM.yyyy HH:mm" type="both" />
+                                </h:outputText>
+                            </p:column>
+
+
+
+                            <p:column headerText="Korisnik">
+                                #{a.author.username}
+                            </p:column>
+
+
+                        </p:dataTable> 
+
+                        <p:commandButton icon="ui-icon-circle-triangle-w" value="Pregled članka" action="#{browse.historyBack()}"  update="@form"/>
+
+                    </h:panelGroup>
+
+
+                </h:form>
+
+
+            </ui:define>
+
+
+        </ui:composition>
+    </h:body>
+</html>
+

@@ -1,0 +1,83 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <h:head>
+        <title>Facelet Title</title>
+    </h:head>
+    <h:body>
+        <ui:composition template="master.xhtml">
+            <ui:define name="pagetitle">Dodaj korisnika</ui:define>
+            <ui:define name="sredina">
+
+                #{userControl.gatherEventLocations()}
+
+                <p:breadCrumb>  
+                    <p:menuitem value="Home" url="/faces/index.xhtml" />
+                    <p:menuitem value="Dodaj korisnika" url="/faces/addUser.xhtml" />
+                </p:breadCrumb>
+
+                <h1>Dodaj korisnika</h1>
+                <h:form id="form">
+
+                    <p:messages id="messages" showDetail="false" autoUpdate="true" />  
+
+                    <h:panelGrid columns="2" cellpadding="5" id="matchGrid">  
+                        <h:outputLabel for="user" value="Korisničko ime:"/>
+                        <p:inputText id="user" value="#{userControl.newUser.username}" required="true" requiredMessage="Korisničko ime je obavezno"/>
+
+                        <h:outputLabel for="pwd1" value="Šifra:"/>
+                        <p:password id="pwd1" match="pwd2" value="#{userControl.newUser.password}" required="true"
+                                    feedback="true"   promptLabel="Jačina šifre" weakLabel="Slaba" 
+                                    goodLabel="Normalna" strongLabel="Jaka" requiredMessage="Šifra je obavezna"
+                                    validatorMessage="Šifre su različite"/>
+
+                        <h:outputLabel for="pwd2" value="Šifra(opet):"/>
+                        <p:password id="pwd2" value="#{userControl.newUser.password2}" required="true" requiredMessage="Šifra je obavezna"/>
+
+                        <h:outputLabel for="email" value="Email:"/>
+                        <p:inputText id="email" value="#{userControl.newUser.email}" required="true" requiredMessage="Email je obavezna"/>
+
+                        <h:outputLabel for="ime" value="Ime:"/>
+                        <p:inputText id="ime" value="#{userControl.newUser.firstName}" required="true" requiredMessage="Ime je obavezno"/>
+
+                        <h:outputLabel for="prezime" value="Prezime:"/>
+                        <p:inputText id="prezime" value="#{userControl.newUser.lastName}" required="true" requiredMessage="Prezime je obavezno"/>
+
+                        <h:outputLabel for="telefon" value="Telefon:"/>
+                        <p:inputText id="telefon" value="#{userControl.newUser.telephone}" required="true" requiredMessage="Telefon je obavezan"/>
+
+                        <h:outputLabel for="adresa" value="Adresa:"/>
+                        <p:inputText id="adresa" value="#{userControl.newUser.address}" required="true" requiredMessage="Adresa je obavezno"/>
+
+                        <h:outputLabel for="city" value="Grad:"/>
+                        <p:inputText id="city" value="#{userControl.newUser.city}" required="true" label="Grad" requiredMessage="Grad je obavezan" />
+
+                        <p:outputLabel for="som1" value="Tip korisnika:" />
+                        <p:selectOneMenu id="som1" value="#{userControl.newUser.type}"> 
+                            <f:selectItem itemLabel="Odaberite jedno" itemValue="-1" />  
+                            <f:selectItem itemLabel="Registrovani korisnik" itemValue="0" />  
+                            <f:selectItem itemLabel="Blagajnik" itemValue="1" />  
+                            <f:selectItem itemLabel="Administrator" itemValue="2" />
+                            <f:ajax event="change" render="@all" immediate="true" />
+                        </p:selectOneMenu>
+
+                        <h:panelGrid id="cashierOptions1" columns="1" rendered="#{userControl.newUser.type eq 1}">
+                            <p:outputLabel for="som2" value="Lokacija:" />
+                            <p:selectOneRadio id="som2" value="#{userControl.selectedLocation}" layout="pageDirection" >  
+                                <f:selectItems value="#{userControl.locations}" />
+                            </p:selectOneRadio>
+                        </h:panelGrid>
+                        <h:outputLabel id="cashierOptions2" rendered="#{userControl.newUser.type eq 1}" />
+                        
+                        <p:commandButton value="Dodaj" action="#{userControl.addUser()}"/>
+                    </h:panelGrid>
+                </h:form> 
+            </ui:define>
+        </ui:composition>
+    </h:body>
+</html>
+

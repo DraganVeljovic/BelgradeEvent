@@ -1,0 +1,123 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core">
+
+    <h:head>
+        <title>Facelet Title</title>
+    </h:head>
+    <h:body>
+        <ui:composition template="master.xhtml">
+            <ui:define name="pagetitle">Belgrade Event</ui:define>
+
+            <ui:define name="sredina">
+
+                <h:form id="searchform"
+                        rendered="#{(not login.user.logged) or (login.user.logged and login.user.type eq 0)}">
+
+                    #{eventControl.gatherEventsData()}
+
+                    <h1>Dobrodošli na BelgradeEvent!</h1>
+
+                    <h3>Pretražite događaje koji Vas zanimaju</h3>
+
+                    <h:panelGrid columns="2">
+                        <p:outputLabel for="keyword" value="Termin za pretragu:"/>
+                        <p:inputText id="keyword" value="#{search.keyword}"/>
+                        <h:outputLabel for="startdate" value="Od datuma:"/>
+                        <p:calendar id="startdate" value="#{search.startDate}" />
+                        <h:outputLabel for="enddate" value="Do datuma:"/>
+                        <p:calendar id="enddate" value="#{search.endDate}" />
+                        
+                        <h:outputLabel for="locations" value="Mesto odrzavanja"/>
+                        <h:outputText />
+
+                        <p:selectManyCheckbox id="locations" value="#{search.selectedEventsLocationList}" layout="pageDirection">
+                            <f:selectItems value="#{search.eventsLocationList}"/>
+                            <f:ajax event="change" immediate="true" />
+                        </p:selectManyCheckbox>
+
+                    </h:panelGrid>
+                    <p:commandButton value="Traži" action="#{search.doSearch()}" update=":searchform"/>
+
+
+                    <p:dataTable id="eventsTable" var="event" value="#{search.searchedEventsList}" paginator="true" rows="10"
+                                 rendered="#{search.submited}">
+
+                        <p:column headerText="Naziv" style="#{event.canceled ? 
+                                                   'background-color: #ffe4e1' : 'background-color: #ffffff'}">
+                            <h:outputLink value="eventDetails.xhtml" rendered="#{login.user.logged}" >
+                                <f:param name="eventtitle" value="#{event.title}" rendered="#{login.user.logged}"/>
+                                #{event.title}
+                            </h:outputLink>
+                            <h:outputText value="#{event.title}" rendered="#{not login.user.logged}" />
+                        </p:column>  
+                        <p:column headerText="Lokacija" style="#{event.canceled ? 
+                                                   'background-color: #ffe4e1' : 'background-color: #ffffff'}">
+                            <h:outputText value="#{event.location.title}"/>
+                        </p:column> 
+                        <p:column headerText="Datum i vreme odrzavanja" style="#{event.canceled ? 
+                                                   'background-color: #ffe4e1' : 'background-color: #ffffff'}">
+                            <h:outputFormat value="{0, date, dd.MM.yyyy hh:mm}" >
+                                <f:param value="#{event.date}" />
+                            </h:outputFormat>
+                        </p:column>
+                        <p:column headerText="Napomena" style="#{event.canceled ? 
+                                                   'background-color: #ffe4e1' : 'background-color: #ffffff'}">
+                            <h:outputText value="OTKAZAN" rendered="#{event.canceled}"/>
+                        </p:column> 
+
+                    </p:dataTable>
+
+                    
+                </h:form>
+
+                <h:form rendered="#{login.user.logged and login.user.type eq 1}">
+                    <h3>Predstojeci dogadjaji</h3>
+
+                    #{eventControl.updateCashierLocation()}
+                    #{eventControl.gatherEventsData()}
+
+                    <p:dataTable id="eventsTable" var="event" value="#{eventControl.allEvents}" paginator="true" rows="10"
+                                 widgetVar="eventsTable" >
+
+                        <f:facet name="header">  
+                            <p:outputPanel>  
+                                <h:outputText value="Pretraga:" />  
+                                <p:inputText id="globalFilter" onkeyup="evetnsTable.filter()" style="width:150px" />  
+                            </p:outputPanel>  
+                        </f:facet>
+
+                        <p:column headerText="Naziv" style="#{event.canceled ? 
+                                                   'background-color: #ffe4e1' : 'background-color: #ffffff'}">
+                            <h:outputLink value="eventOverview.xhtml" >
+                                <f:param name="eventtitle" value="#{event.title}" />
+                                #{event.title}
+                            </h:outputLink>
+                        </p:column>  
+
+                        <p:column headerText="Datum i vreme odrzavanja" style="#{event.canceled ? 
+                                                   'background-color: #ffe4e1' : 'background-color: #ffffff'}">
+                            <h:outputFormat value="{0, date, dd.MM.yyyy hh:mm}" >
+                                <f:param value="#{event.date}" />
+                            </h:outputFormat>
+                        </p:column>
+                        
+                        <p:column headerText="Napomena" style="#{event.canceled ? 
+                                                   'background-color: #ffe4e1' : 'background-color: #ffffff'}">
+                            <h:outputText value="#{event.canceled ? 'OTKAZAN' : ''}" />
+                        </p:column>
+
+                    </p:dataTable>
+
+                </h:form>
+
+            </ui:define>
+
+        </ui:composition>
+    </h:body>
+</html>
+

@@ -1,0 +1,106 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:pe="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core">
+    <f:metadata>
+        <f:viewParam name="eventtitle" value="#{search.displayEventTitle}" />
+    </f:metadata>
+    <h:head>
+        <title>Facelet Title</title>
+    </h:head>
+    <h:body>
+        <ui:composition template="master.xhtml">
+            <ui:define name="pagetitle">Rezervisanje dogadjaja</ui:define>
+
+            <ui:define name="sredina">
+
+                #{search.updateDisplayEvent()}
+
+                <h:form>
+                    <p:breadCrumb>  
+                        <p:menuitem value="Pocetna" url="/faces/index.xhtml" />
+                        <p:menuitem value="Detalji dogadjaja" url="/faces/eventDetails.xhtml" >
+                            <f:param name="eventtitle" value="#{search.displayEventTitle}" />
+                        </p:menuitem>
+                    </p:breadCrumb>
+
+                    <h:panelGrid columns="2">
+
+                        <h:outputText value="Naziv dogadjaja:"/>
+                        <h:outputText value="#{search.displayEvent.title}"/>
+
+                        <h:outputText value="Datum i vreme odrzavanja:"/>
+                        <h:outputFormat value="{0, date, dd.MM.yyyy hh:mm}" >
+                            <f:param value="#{search.displayEvent.date}" />
+                        </h:outputFormat>
+
+                        <h:outputText value="Mesto odrzavanja:"/>
+                        <h:outputText value="#{search.displayEvent.location.title}" />
+
+                        <br></br><br></br>
+
+                    </h:panelGrid>
+
+                    <p:messages autoUpdate="true" />
+
+                    <p:dataTable value="#{search.categoryTickets}" var="cat">
+
+                        <p:column headerText="Naziv kategorije">
+                            <p:outputLabel value="#{cat.category.name}" />
+                        </p:column>
+
+                        <p:column headerText="Cena karte">
+                            <p:outputLabel value="#{cat.category.ticketPrice}" />
+                        </p:column>
+
+                        <p:column headerText="Broj karata">
+                            <p:inputText value="#{cat.tickets}" />
+                        </p:column>
+
+                    </p:dataTable>
+
+                    <h:panelGroup rendered="#{search.displayEvent.files.size() gt 0}">
+                        <h3>Priloženi fajlovi</h3>
+                        <p:galleria value="#{search.images()}" var="image" styleClass="ui-widget-content" style="margin: 0 auto"    panelWidth="600" panelHeight="350" rendered="#{search.images().size()>0}" >  
+                            <p:graphicImage value="resources/uploads/#{image}" />  
+                        </p:galleria>
+                        <br/>
+
+
+                        <p:dataList value="#{search.displayEvent.files}" var="f">
+                            <h:outputLink value="resources/uploads/#{f.path}" target="_blank">#{f.name}</h:outputLink>
+                        </p:dataList>
+
+                    </h:panelGroup>
+                    
+                    <p:outputLabel for="commentsTable" value="Komentari" />
+                    <p:dataTable id="commentsTable" var="comm" value="#{search.eventCommentsGrades}" >
+                    
+                        <p:column headerText="Komentar">
+                            <p:outputLabel value="#{comm.comment}" />
+                        </p:column>
+
+                        <p:column headerText="Ocena">
+                            <p:outputLabel value="#{comm.grade}" />
+                        </p:column>
+                        
+                    </p:dataTable>
+
+                    <p:commandButton icon="ui-icon-star" value="Rezervisi" action="#{search.makeReservation}" />
+                    <p:commandButton icon="ui-icon-close" value="Zatvori" action="index.xhtml" />
+
+
+                </h:form>
+
+
+            </ui:define>
+
+
+        </ui:composition>
+    </h:body>
+</html>
+

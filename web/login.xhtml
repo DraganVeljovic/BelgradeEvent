@@ -1,0 +1,68 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core">
+    <f:metadata>
+        <f:viewParam name="changePassword" value="#{login.changePassword}" />    
+    </f:metadata>
+    <h:head>
+        <title>Facelet Title</title>
+    </h:head>
+    <h:body>
+        <ui:composition template="master.xhtml">
+            <ui:define name="pagetitle">Login</ui:define>
+            <ui:define name="sredina">
+                
+                <p:breadCrumb>  
+                    <p:menuitem value="Home" url="/faces/index.xhtml" />
+                    <p:menuitem value="Login" url="/faces/login.xhtml?zaboravljena=false" />
+                </p:breadCrumb> 
+              
+
+                <h:form>
+                    <h:panelGroup rendered="#{not logichangePasswordna}">
+  <h1>Login</h1>
+  <p:messages showDetail="false" autoUpdate="true" />
+                        <h:panelGrid columns="2" >                     
+                            <h:outputLabel for="username2" value="Korisničko ime:" />  
+                            <p:inputText id="username2"  value="#{login.user.username}"  required="true" requiredMessage="Korisničko ime je potrebno" styleClass="smallInput"/>  
+
+                            <h:outputLabel for="pwd2" value="Šifra:" />  
+                            <p:password id="pwd2" value="#{login.user.password}" required="true" requiredMessage="Šifra je potrebna" styleClass="smallInput"/>  
+
+                            <p:commandButton id="saveButton2"  value="Login" action="#{login.checkLogin()}" styleClass="loginButton" icon="ui-icon-unlocked"/> 
+                        </h:panelGrid> 
+
+                    </h:panelGroup>
+                </h:form>
+
+
+                <h:form>
+
+
+                    <h:panelGroup rendered="#{logichangePasswordna}">
+  <h1>Promena sifre</h1>
+  <p:messages showDetail="false" autoUpdate="true" />
+                        <h:panelGrid columns="2" id="loginGrid2" rendered="#{lochangePasswordjena}">                     
+                            <h:outputLabel for="username3" value="Korisničko ime:" />  
+                            <p:inputText id="username3"  value="#{login.user.username}"  required="true" requiredMessage="Korisničko ime je potrebno" styleClass="smallInput"/>  
+
+                            <h:outputLabel for="pass" value="Stara sifra:" />  
+                            <p:password id="pass"  value="#{login.user.password}"  required="true" requiredMessage="Sifra je potrebna" styleClass="smallInput"/>  
+
+                            <h:outputLabel for="pass2" value="Nova sifra:" />  
+                            <p:password id="pass2"  value="#{login.user.password2}"  required="true" requiredMessage="Sifra je potrebna" styleClass="smallInput"/>  
+
+                            <p:commandButton id="saveButton2"  value="Pošalji" action="#{login.changeLoginData()}" styleClass="loginButton" icon="ui-icon-unlocked"/> 
+                        </h:panelGrid> 
+                    </h:panelGroup>
+                </h:form>
+               
+            </ui:define>
+        </ui:composition>
+    </h:body>
+</html>
+

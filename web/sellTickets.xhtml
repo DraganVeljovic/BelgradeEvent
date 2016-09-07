@@ -1,0 +1,44 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <h:head>
+        <title>Facelet Title</title>
+    </h:head>
+    <h:body>
+        <ui:composition template="master.xhtml">
+            <ui:define name="pagetitle">Prodaja ulaznica</ui:define>
+            <ui:define name="sredina">
+                
+                 <p:breadCrumb>  
+                        <p:menuitem value="Home" url="/faces/index.xhtml" />
+                        <p:menuitem value="Prodaja" url="/faces/sellTickets.xhtml" />
+                 </p:breadCrumb>
+                
+                <h1>Prodaja ulaznica</h1>
+                <h:form>
+                    
+                    <p:messages id="messages" showDetail="false" autoUpdate="true" />  
+
+                    <h:panelGrid columns="2" cellpadding="5" id="matchGrid">  
+                        
+                        <h:outputLabel for="events" value="Izaberite dogadjaj:"/>
+                        <p:selectOneMenu id="events" value="#{ticketsControl.selectedEventTitle}">
+                            <f:selectItems value="#{eventControl.allEvents}" />
+                        </p:selectOneMenu>
+
+                        <h:outputLabel for="tickets" value="Broj ulaznica:"/>
+                        <p:inputText id="tickets" value="#{ticketsControl.ticketsToSell}" required="true" 
+                                     requiredMessage="Broj ulaznica za prodaju je neophodan"/>
+                        
+                        <p:commandButton icon="ui-icon-cart" value="Prodaj" action="#{ticketsControl.sellTickets}" />
+                    </h:panelGrid>
+                </h:form> 
+            </ui:define>
+        </ui:composition>
+    </h:body>
+</html>
+

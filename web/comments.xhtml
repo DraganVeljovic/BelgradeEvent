@@ -1,0 +1,87 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:pe="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core">
+    <f:metadata>
+        <f:viewParam name="eventtitle" value="#{search.displayEventTitle}" />
+    </f:metadata>
+    <h:head>
+        <title>Facelet Title</title>
+    </h:head>
+    <h:body>
+        <ui:composition template="master.xhtml">
+            <ui:define name="pagetitle">Komentari</ui:define>
+
+            <ui:define name="sredina">
+
+                #{search.gatherReservationData()}
+                #{search.gatherCommentsData()}
+
+                <h:form id="form">
+                    <p:breadCrumb>  
+                        <p:menuitem value="Pocetna" url="/faces/index.xhtml" />
+                        <p:menuitem value="Komentari" url="/faces/comments.xhtml" />
+                    </p:breadCrumb>
+
+                    <h:panelGrid columns="2">
+
+                        <p:outputLabel for="selectoneevent" value="Naziv dogadjaja:"/>
+                        <p:selectOneMenu id="selectoneevent" value="#{search.displayEventTitle}">
+                            <f:selectItems value="#{search.commentsEnabledEvents}" />
+                        </p:selectOneMenu>
+
+                        <p:outputLabel for="textarea" value="Komentar:"/>
+                        <p:inputTextarea id="textarea" cols="30" rows="6" value="#{search.comment}" />
+
+                        <p:outputLabel for="selectonegrade" value="Ocena:"/>
+                        <p:selectOneMenu id="selectonegrade" value="#{search.grade}">
+                            <f:selectItem itemLabel="1" itemValue="1" />
+                            <f:selectItem itemLabel="2" itemValue="2" />
+                            <f:selectItem itemLabel="3" itemValue="3" />
+                            <f:selectItem itemLabel="4" itemValue="4" />
+                            <f:selectItem itemLabel="5" itemValue="5" />
+                            <f:selectItem itemLabel="6" itemValue="6" />
+                            <f:selectItem itemLabel="7" itemValue="7" />
+                            <f:selectItem itemLabel="8" itemValue="8" />
+                            <f:selectItem itemLabel="9" itemValue="9" />
+                            <f:selectItem itemLabel="10" itemValue="10" />
+                        </p:selectOneMenu>
+                        
+                        <p:commandButton value="Dodaj" action="#{search.grading}" update=":form:table" />
+                        <p:outputLabel />
+                        
+                        <br></br><br></br>
+
+                    </h:panelGrid>
+
+                    <p:messages autoUpdate="true" />
+
+                    <p:dataTable id="table" value="#{search.userComments}" var="comm">
+
+                        <p:column headerText="Naziv dogadjaja">
+                            <p:outputLabel value="#{comm.eventname}" />
+                        </p:column>
+
+                        <p:column headerText="Komentar">
+                            <p:outputLabel value="#{comm.comment}" />
+                        </p:column>
+
+                        <p:column headerText="Ocena">
+                            <p:outputLabel value="#{comm.grade}" />
+                        </p:column>
+
+                    </p:dataTable>
+
+                </h:form>
+
+
+            </ui:define>
+
+        </ui:composition>
+    </h:body>
+</html>
+

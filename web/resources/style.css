@@ -1,0 +1,173 @@
+/* 
+    Document   : style
+    Created on : Nov 21, 2013, 9:30:40 PM
+    Author     : Drazen
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+root { 
+    display: block;
+}
+body{
+    background-image: url('images/grey1.png');
+    background-repeat: repeat;
+    font-family: 'Helvetica',Arial,sans-serif;
+}
+#container{
+    width:95%;
+    margin: 10px auto 10px auto;
+    background: #FFFFFF;
+    border: 1px solid #D4D4D4;
+    min-height: 100%;
+}
+#header{
+    height: 100px;
+     
+}
+#headerMenu{
+   
+    position: relative;
+    clear: both;
+   
+}
+#headerMenu ul li a .ui-menuitem-icon{
+    margin-top: 10px !important;
+    
+}
+#headerLeft{
+    float:left;
+    width: 50%;
+}
+#headerRight{
+    float:right;
+    width: 50%;
+    
+}
+#left{
+    
+    float: left;
+    width: 180px; /*Width of left column*/ 
+    
+    
+    
+  
+    
+}
+
+#right{
+   
+    margin-left: 180px;
+    margin-right: 10px; 
+    padding-left: 10px;
+    border-left:  1px solid #D4D4D4;
+    min-height: 500px;
+    
+}
+#footer{
+    margin: 2px auto;
+    font-size: 10px;
+    color: #999999;
+    width: 95%;
+    text-align: center;
+}
+
+.ui-menubar .ui-menuitem-link {
+   font-size: 16px;
+   line-height: 35px !important;
+   padding: 0px 0.3em !important;
+}
+.ui-menubar{
+    height: 35px;
+    padding: 0px !important;
+    border-left: none !important;
+    border-right: none !important;
+}
+.ui-menu .ui-menuitem {
+    margin: 0px !important;
+}
+.ui-corner-all{
+    border-radius: 0px;
+}
+.fix{
+    clear: both;
+}
+.ui-state-hover {
+   
+}
+
+.smallInput{
+    height: 16px;
+    width: 130px !important;
+}
+.loginButton{
+    height: 30px;
+    width: 140px !important;
+    
+}
+.loginButton .ui-button-text{
+    padding: 0px !important;
+    font-size: 12px;
+}
+label{
+     font-size: 12px;
+}
+.ui-menu.ui-widget{
+    border-radius: 0 !important;
+}
+h1{
+    font-family: 'Helvetica',Arial,sans-serif;
+    font-size: 22px;
+    font-weight: 300;
+    color:#000000;
+    text-shadow:  1px 1px 3px #DDDDDD;
+}
+
+#right h3{
+    font-family: 'Helvetica',Arial,sans-serif;
+    font-size: 18px;
+    font-weight: 300;
+    color:#000000;
+    text-shadow:  1px 1px 3px #DDDDDD;
+}
+.ui-widget {
+    font-size: 12px !important;
+}
+.text{
+     font-size: 12px !important;
+}
+.order-table{   
+	border-collapse:collapse;
+        width: 100%;
+}
+ 
+.order-table-header{
+	font-size: 12px;
+	background:none repeat scroll 0 0 #E5E5E5;
+	border-bottom:1px solid #BBBBBB;
+	padding:5px;
+        text-align: left;
+}
+ 
+.order-table-odd-row{
+	font-size: 12px;
+	background:none repeat scroll 0 0 #FFFFFF;
+	border-top:1px solid #BBBBBB;
+        padding:5px;
+}
+ 
+.order-table-even-row{
+	font-size: 12px;
+	background:none repeat scroll 0 0 #F9F9F9;
+	border-top:1px solid #BBBBBB;
+        padding:5px;
+}
+a{
+    color:#0088CC;
+}
+
+.ui-widget-content {
+    background: none repeat scroll 0 0 #FFFFFF;
+    border: 1px solid #DDDDDD;
+    color: #333333;
+}

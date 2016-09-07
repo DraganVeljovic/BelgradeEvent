@@ -1,0 +1,66 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core">
+    <h:head>
+        <title>Facelet Title</title>
+    </h:head>
+    <h:body>
+        <ui:composition template="master.xhtml">
+            <ui:define name="pagetitle">Odobravanje korisnika</ui:define>
+
+            <ui:define name="sredina">
+                <h1>Odobravanje korisnika</h1>
+                #{userControl.gatherApprovalData()}
+                
+                <p:breadCrumb>  
+                    <p:menuitem value="Home" url="/faces/index.xhtml" />
+                    <p:menuitem value="Odobri korisnika" url="/faces/userApproval.xhtml" />
+                </p:breadCrumb> 
+                
+                <p:ajaxStatus onstart="statusDialog.show();" onsuccess="statusDialog.hide();"/>  
+
+                <p:dialog modal="true" widgetVar="statusDialog" header="Status"   
+                          draggable="false" closable="false" >  
+                    <p:graphicImage value="/resources/images/ajaxloadingbar.gif" />  
+                </p:dialog> 
+                <h:form id="form">
+
+
+                    <p:growl id="growl" showDetail="true"/>
+
+                    <p:dataTable id="users" var="u" value="#{userControl.waitingForApproval}" paginator="true" rows="10">
+
+                        <p:column headerText="Korisničko ime">
+                            #{u.username}
+                        </p:column>
+
+                        <p:column headerText="Ime">
+                            #{u.firstName}
+                        </p:column>
+
+                        <p:column headerText="Prezime" >
+                            #{u.lastName}
+                        </p:column>
+
+                        <p:column headerText="Email">
+                            #{u.email}
+                        </p:column>
+                        
+                        <p:column headerText="Akcija">
+                            <p:commandButton value="Odobri" action="#{userControl.approveUser(u)}" update=":form:users "/>
+                            <p:commandButton value="Obriši" action="#{userControl.deleteUser(u)}" update=":form:users "/>
+                        </p:column>
+                        
+                    </p:dataTable>
+                </h:form>
+
+
+            </ui:define>
+        </ui:composition>
+    </h:body>
+</html>
+

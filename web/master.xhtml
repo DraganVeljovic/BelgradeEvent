@@ -1,0 +1,142 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core">
+    <h:head>
+        <meta charset="UTF-8" />
+        <h:outputStylesheet library="/" name="style.css"/>
+        <link rel="shortcut icon" type="image/png" href="resources/images/favicon.png" />
+        <title><ui:insert name="pagetitle">Belgrade Events</ui:insert></title>
+
+    </h:head>
+    <h:body>
+
+        <div id="container">
+
+            <div id="header">
+                <table><tr><td>
+                <div id="headerLeft" align="left">
+                    <h:graphicImage library="images/" name="logo.png" style="margin-left: 10px;margin-top: 5px;max-width: 100%;height: auto"/>
+                </div>
+                    </td>
+                    <td>
+                <div id="headerRight" align="right">
+                    <h:form style="margin-left: 25px" >
+                        <h:panelGroup rendered="#{not login.user.logged}">
+                            <p:growl autoUpdate="true" showDetail="true" sticky="false"/>
+                            <h:panelGrid columns="2" id="loginGrid" style="float:right">                     
+                                <h:outputLabel for="username" value="Korisničko ime:" />  
+                                <p:inputText id="username"  value="#{login.user.username}" requiredMessage="Korisničko ime je potrebno"  required="true" styleClass="smallInput"/>  
+
+                                <h:outputLabel for="pwd" value="Šifra:" />  
+                                <p:password id="pwd" value="#{login.user.password}" required="true"  requiredMessage="Šifra je potrebna" styleClass="smallInput"/>  
+                                <h:outputLink value="login.xhtml" >
+                                    <f:param name="changePassoword" value="true"/>
+                                    Promena sifre
+                                </h:outputLink>
+                                <p:commandButton id="saveButton" icon="ui-icon-unlocked" value="Login" action="#{login.checkLogin()}" styleClass="loginButton"/> 
+                            </h:panelGrid>  
+                        </h:panelGroup>
+                        <h:panelGroup rendered="#{login.user.logged}" style="text-align: right;float:right;margin:5px 5px 0 0">
+                            Dobrodošli <b><h:outputText value="#{login.user.firstName} "/> <h:outputText value="#{login.user.lastName}"/>!</b>
+
+
+                            <br/> <p:commandButton value="Izlaz" action="#{login.logout()}" icon="ui-icon ui-icon-locked" />
+                        </h:panelGroup>
+                    </h:form>
+                    <p:ajaxStatus style="width:220px;height:19px;position:fixed;top: 50%; left: 48%;">  
+                        <f:facet name="start">  
+                            <p:graphicImage value="/resources/images/ajaxloadingbar.gif" />  
+                        </f:facet>  
+
+                        <f:facet name="complete">  
+                            <h:outputText value="" />  
+                        </f:facet>  
+                    </p:ajaxStatus> 
+
+                </div>
+                    </td></tr></table>
+            </div>
+
+            <div id="headerMenu">
+                <p:menubar >
+                    <p:menuitem value="Početna" url="/faces/index.xhtml" icon="ui-icon-home"/>
+                    <p:menuitem value="Registracija" url="/faces/registration.xhtml" rendered="#{not login.user.logged}" icon="ui-icon-person"></p:menuitem>
+                    <p:menuitem value="Login" url="/faces/login.xhtml?changePassword=false" rendered="#{not login.user.logged}" icon="ui-icon-unlocked"></p:menuitem>
+                    
+                </p:menubar>
+            </div>
+
+            <div class="fix"></div>
+            <div id="left">
+                <h:form>
+                    <p:panelMenu  rendered="#{login.user.type eq 2}">  
+                        <p:submenu label="Korisnici" >  
+                            <p:menuitem icon="ui-icon-check" value="Odobravanje korisnika" url="/faces/userApproval.xhtml"/>
+                            <p:menuitem icon="ui-icon-key" value="Deblokiranje korisnika" url="/faces/userDeblock.xhtml"/>
+                            <p:menuitem icon="ui-icon-plus" value="Dodaj korisnika" url="/faces/addUser.xhtml"/>
+                            <p:menuitem icon="ui-icon-tag" value="Dodaj lokaciju" url="/faces/addLocation.xhtml"/>
+                            <p:menuitem icon="ui-icon-person" value="Pregled korisnika" url="/faces/usersOverview.xhtml"/>
+                        </p:submenu>  
+
+                        <p:submenu label="Statistika" >  
+                            <p:menuitem icon="ui-icon-image" value="Korisnika" url="/faces/userStatistics.xhtml"/>
+                            <p:menuitem icon="ui-icon-image" value="Dogadjaja" url="/faces/eventStatistics.xhtml"/>
+                        </p:submenu>  
+
+                        <p:separator />  
+
+                    </p:panelMenu>  
+
+                    <p:panelMenu  rendered="#{login.user.type eq 1}">  
+                        <p:submenu label="Dogadjaji" >  
+                            <p:menuitem icon="ui-icon-plus" value="Dodaj" url="/faces/addEvent.xhtml"/>
+                        </p:submenu> 
+                        
+                        <p:submenu label="Ulaznice" >  
+                            <p:menuitem icon="ui-icon-cart" value="Prodaja" url="/faces/sellTickets.xhtml"/>
+                            <p:menuitem icon="ui-icon-cart" value="Prodaja rezervisanih" url="/faces/sellReservations.xhtml"/>
+                        </p:submenu> 
+
+
+                        <p:separator />  
+
+                    </p:panelMenu> 
+                    <p:panelMenu  rendered="#{login.user.logged}">  
+                        <p:submenu label="Ulaznice" rendered="#{login.user.type eq 0}" >  
+                            <p:menuitem value="Pregled rezervacija" url="/faces/reservationsOverview.xhtml" icon="ui-icon-note"></p:menuitem>
+                            <p:menuitem value="Pregled kupljenih karata" url="/faces/boughtTicketsOverview.xhtml" icon="ui-icon-check"></p:menuitem>
+                           </p:submenu>
+                        <p:submenu label="Poruke" rendered="#{login.user.type eq 0}" >  
+                            <p:menuitem value="Pregled poruka" url="/faces/messagesOverview.xhtml" icon="ui-icon-mail-closed"></p:menuitem>
+                        </p:submenu>
+                        <p:submenu label="Komentari" rendered="#{login.user.type eq 0}" >  
+                            <p:menuitem value="Pregled i dodavanje" url="/faces/comments.xhtml" icon="ui-icon-pencil"></p:menuitem>
+                        </p:submenu>
+                        <p:submenu label="Moj nalog" >  
+                            <p:menuitem value="Moj nalog" url="/faces/myaccount.xhtml" icon="ui-icon-person"></p:menuitem>
+                            <p:menuitem value="Promena podataka" url="/faces/userDataChange.xhtml" icon="ui-icon-document"></p:menuitem>
+                        </p:submenu>  
+                      <p:separator/>  
+
+                    </p:panelMenu>  
+                   
+                </h:form>
+
+                <div class="fix"></div>
+            </div>
+
+            <div id="right">
+                <ui:insert name="sredina">
+                    <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+                </ui:insert>
+            </div>
+            <div class="fix"></div>
+        </div>
+        <div id="footer">&copy; 2014 Programiranje internet aplikacija - ELEKTROTEHNICKI FAKULTET BEOGRAD</div>
+    </h:body>
+</html>
+

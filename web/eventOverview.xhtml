@@ -1,0 +1,70 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:pe="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core">
+    <f:metadata>
+        <f:viewParam name="eventtitle" value="#{eventControl.displayEventTitle}" />
+    </f:metadata>
+    <h:head>
+        <title>Facelet Title</title>
+    </h:head>
+    <h:body>
+        <ui:composition template="master.xhtml">
+            <ui:define name="pagetitle">Pregled dogadjaja</ui:define>
+
+            <ui:define name="sredina">
+
+                #{eventControl.updateDisplayEvent()}
+
+                <h:form id="form">
+                    <p:breadCrumb>  
+                        <p:menuitem value="Home" url="/faces/index.xhtml" />
+                        <p:menuitem value="Dogadjaji" url="/faces/addUser.xhtml" />
+                        <p:menuitem value="Dodaj korisnika" url="/faces/addUser.xhtml" />
+                    </p:breadCrumb>
+
+                    <p:messages id="messages" autoUpdate="true" showDetail="false"/> 
+
+                    <h:panelGrid columns="2">
+
+                        <h:outputText value="Naziv dogadjaja:"/>
+                        <p:inputText value="#{eventControl.displayEvent.title}" required="true" 
+                                     requiredMessage="Naziv dogadjaja je neophodan"/>
+
+                        <h:outputText value="Datum i vreme odrzavanja:"/>
+                        <p:calendar value="#{eventControl.displayCalendarValue}" pattern="dd.MM.yyyy hh:mm"
+                                    required="true" requiredMessage="Datum i vreem dogadjaja su neophodni">
+                            <p:ajax event="dateSelect" update=":form:calendar2" />
+                        </p:calendar>
+
+                        <h:outputText value="Mesto odrzavanja:"/>
+                        <h:outputText value="#{eventControl.displayEvent.location.title}"/>
+                        
+                        <h:outputLabel for="calendar2" value="Mogucnost rezervisanja do:"/>
+                        <p:calendar id="calendar2" value="#{eventControl.displayCalendarReservationValue}" pattern="dd.MM.yyyy hh:mm"/>
+                        
+                        <h:outputLabel for="maxreservations" value="Maximalno rezervacija po korisniku:"/>
+                        <p:inputText id="maxreservations" value="#{eventControl.displayEvent.maxReservations}" />
+
+                    </h:panelGrid>
+                    <h:panelGrid columns="4">
+                        <p:commandButton icon="ui-icon-disk" value="Izmeni" action="#{eventControl.changeEventDetails()}" />
+                        <p:commandButton icon="ui-icon-close" value="Zatvori" action="index.html" />
+                        <p:commandButton icon="ui-icon-flag" value="Otkazi" action="#{eventControl.postponeEvent()}"/>
+                        <p:commandButton icon="ui-icon-trash" value="Obrisi" action="#{eventControl.deleteEvent()}"/>
+                    </h:panelGrid>
+
+                </h:form>
+
+
+            </ui:define>
+
+
+        </ui:composition>
+    </h:body>
+</html>
+
