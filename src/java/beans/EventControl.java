@@ -1,5 +1,11 @@
 package beans;
 
+import db.BelgradeEventFile;
+import db.BelgradeEvent;
+import db.Category;
+import db.BelgradeEventLocation;
+import db.Cashier;
+import db.DbFactory;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -15,13 +21,14 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
-import java.util.StringTokenizer;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.SessionScoped;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
+import org.hibernate.Query;
+import org.hibernate.Session;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.UploadedFile;
 
@@ -57,57 +64,27 @@ public class EventControl implements Serializable {
     private List<StatisticElement> eventsStatistics = new LinkedList<>();
     
     private List<Category> newEventsCategories = new LinkedList<>();
+    
+    private Session session;
 
     public void updateCashierLocation() {
-        Connection con = null;
-        Statement st = null;
-        Statement st2 = null;
-        ResultSet rs = null;
-        ResultSet rs2 = null;
-
-        try {
-
-            Class.forName("com.mysql.jdbc.Driver");
-
-            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/piaprojekat", "root", "");
-
-            st = con.createStatement();
-
-            String query = "select locationid from cashiers where userid=" + login.getUser().getId();
-
-            rs = st.executeQuery(query);
-
-            if (rs.next()) {
-
-                locationId = rs.getInt("locationid");
-
-                query = "select * from locations where id=" + locationId;
-
-                st2 = con.createStatement();
-
-                rs2 = st2.executeQuery(query);
-
-                if (rs2.next()) {
-
-                    eventLocation = new BelgradeEventLocation();
-
-                    eventLocation.setTitle(rs2.getString("title"));
-                    eventLocation.setAddress(rs2.getString("address"));
-                    eventLocation.setCapacity(rs2.getInt("capacity"));
-
-                }
-
-                rs2.close();
-                st2.close();
-            }
-
-            rs.close();
-            st.close();
-            con.close();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        
+        session = DbFactory.getFactory().openSession();
+        
+        session.beginTransaction();
+        
+        Query query = session.createQuery("from Cashier where userid=:u");
+        query.setParameter("u", login.getUser().getId());
+        
+        System.out.println(login.getUser().getUsername() + "  " + login.getUser().getId());
+        
+        eventLocation = ((Cashier) query.list().get(0)).getLocation();
+        
+        System.out.println(eventLocation.getTitle() + "  " + eventLocation.getId());
+        
+        session.getTransaction().commit();
+        
+        session.close();
     }
 
     public void gatherEventsData() {
@@ -115,47 +92,30 @@ public class EventControl implements Serializable {
         allEvents.clear();
 
         allEventsTitles.clear();
+
+        session = DbFactory.getFactory().openSession();
         
-        Connection con = null;
-        Statement st = null;
-        ResultSet rs = null;
-
-        try {
-
-            Class.forName("com.mysql.jdbc.Driver");
-
-            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/piaprojekat", "root", "");
-
-            st = con.createStatement();
-
-            String query = "select * from events where locationid=" + locationId;
-
-            rs = st.executeQuery(query);
-
-            while (rs.next()) {
-
-                BelgradeEvent event = new BelgradeEvent();
-
-                event.setId(rs.getInt("id"));
-                event.setTitle(rs.getString("title"));
-                event.setDate(rs.getTimestamp("date"));
-                event.setLocation(eventLocation);
-                event.setCanceled(rs.getBoolean("canceled"));
-
-                allEvents.add(event);
-
-                allEventsTitles.put(event.getTitle(), event);
-
-            }
-
-            rs.close();
-            st.close();
-            con.close();
-
-        } catch (Exception e) {
-            e.printStackTrace();
+        session.beginTransaction();
+        
+        Query query;
+        
+        if (eventLocation == null) {
+            query = session.createQuery("from BelgradeEvent");
+        } else {
+            query = session.createQuery("from BelgradeEvent where locationid=:l");
+            query.setParameter("l", eventLocation.getId());
         }
+        
+        List<BelgradeEvent> res = query.list();
+        
+        for (BelgradeEvent event : res) {
+            allEvents.add(event);
 
+            allEventsTitles.put(event.getTitle(), event);
+
+        }
+        
+        session.close();
     }
 
     public void updateDisplayEvent() {
@@ -169,91 +129,34 @@ public class EventControl implements Serializable {
 
     public String addEvent() {
 
-        Connection con = null;
-        Statement st = null;
-        ResultSet rs = null;
-
-        try {
-
-            Class.forName("com.mysql.jdbc.Driver");
-
-            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/piaprojekat", "root", "");
-
-            st = con.createStatement();
-
-            String query = "insert into events(title, locationid, date, canceled, soldTickets, resenable, maxres, description) values('"
-                    + newEvent.getTitle() + "', " + locationId + ", '" + newEvent.getDate() + "', " + false + "," + 0
-                    + ",'" + newEvent.getReservationEnableDate() + "'," + newEvent.getMaxReservations() + ", '"
-                    + newEvent.getDescription() + "')";
-
-            st.executeUpdate(query);
-            
-            query = "select id from events where title='" + newEvent.getTitle() + "'";
-            
-            rs = st.executeQuery(query);
-            
-            int id = 0;
-            
-            if (rs.next()) {
-                id = rs.getInt("id");
-            }
-            
-            for (Category c : newEventsCategories) {
-                
-                query = "insert into categories(eventid, name, size, price) values(" + id + ",'" + c.getName() + "'," 
-                        + c.getSize() + "," + c.getTicketPrice() + ")";
-                
-                st.executeUpdate(query);
-                
-            }
-            
-            for (BelgradeEventFile f : newEvent.getFiles()) {
-                
-                query = "insert into files(eventid, filename, filepath) values(" + id + ",'" + f.getName() + "','"
-                        + f.getPath() + "')";
-                
-                st.executeUpdate(query);
-                
-            }
-
-            rs.close();
-            st.close();
-            con.close();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
+        session = DbFactory.getFactory().openSession();
+        
+        session.beginTransaction();
+        
+        newEvent.setCategories(newEventsCategories);
+        
+        session.save(newEvent);
+        
+        session.getTransaction().commit();
+        
+        session.close();
+        
         return "index?faces-redirect=true";
     }
 
     public void changeEventDetails() {
-
-        Connection con = null;
-        Statement st = null;
-
-        try {
-
-            Class.forName("com.mysql.jdbc.Driver");
-
-            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/piaprojekat", "root", "");
-
-            st = con.createStatement();
-
-            String query = "update events set title='" + displayEvent.getTitle() + "', date='" + displayEvent.getDate()
-                    + "', resenable='" + displayEvent.getReservationEnableDate() + "', maxres=" + displayEvent.getMaxReservations()
-                    + " where id=" + allEventsTitles.get(displayEventTitle).getId();
-
-            st.executeUpdate(query);
-
-            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Izmena je uspesna!"));
-
-            st.close();
-            con.close();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        
+        session = DbFactory.getFactory().openSession();
+        
+        session.beginTransaction();
+        
+        session.update(displayEvent);
+        
+        session.getTransaction().commit();
+        
+        session.close();
+        
+        FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Izmena je uspesna!"));
 
     }
 
@@ -310,28 +213,16 @@ public class EventControl implements Serializable {
     }
 
     public void deleteEvent() {
-
-        Connection con = null;
-        Statement st = null;
-
-        try {
-
-            Class.forName("com.mysql.jdbc.Driver");
-
-            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/piaprojekat", "root", "");
-
-            st = con.createStatement();
-
-            String query = "delete from events where id=" + allEventsTitles.get(displayEventTitle).getId();
-
-            st.executeUpdate(query);
-
-            st.close();
-            con.close();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        
+        session = DbFactory.getFactory().openSession();
+        
+        session.beginTransaction();
+        
+        session.delete(allEventsTitles.get(displayEventTitle));
+        
+        session.getTransaction().commit();
+        
+        session.close();
 
     }
     

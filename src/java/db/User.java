@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package beans;
+package db;
 
 
 import java.io.Serializable;
@@ -29,20 +29,17 @@ import javax.persistence.Transient;
  *
  * @author Dragan
  */
-/**
- * Tipovi korisnika:
- * 0-registrovani
- * 1-blagajnik
- * 2-administrator
- * @author Drazen
- * Status:
- * 0-ne odobren
- * 1-odobren
- */
 
+
+@Entity
+@Table(name="users")
 public class User implements Serializable {
     
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(nullable=false, unique=true)
     private int id = 0;
+    
     private String username = "";
     private String password = "";
     private String password2 = "";
@@ -58,9 +55,11 @@ public class User implements Serializable {
     
     private boolean blocked = false;
 
+    @Transient
     private boolean logged = false;
     
     private Timestamp lastlogin = null;
+    
     private Timestamp registered = null;
     
     public Timestamp getLastlogin() {

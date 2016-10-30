@@ -1,35 +1,61 @@
-package beans;
+package db;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.LinkedList;
 import java.util.List;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 
 /**
  *
  * @author Dragan
  */
+
+@Entity
+@Table(name = "events")
 public class BelgradeEvent implements Serializable {
     
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(nullable=false, unique=true)
     private int id = 0;
     
     private String title = "";
     
-    private BelgradeEventLocation location = null;
+    @ManyToOne
+    @JoinColumn(name = "locationid")
+    private BelgradeEventLocation location;
+    //private BelgradeEventLocation location = null;
     
     private Timestamp date = null;
     
-    private int soldTickets = 0;
-    
     private boolean canceled = false;
     
+    @Column(name = "soldtickets")
+    private int soldTickets = 0;
+    
+    @Column(name = "resenable")
     private Timestamp reservationEnableDate = null;
     
+    @Column(name = "maxres")
     private int maxReservations = 10;
     
     private String description = "";
     
+    @OneToMany(fetch = FetchType.LAZY)
     private List<BelgradeEventFile> files = new LinkedList<>();
+    
+    @OneToMany(fetch = FetchType.LAZY)
+    private List<Category> categories = new LinkedList<>();
 
     public String getTitle() {
         return title;
@@ -110,8 +136,14 @@ public class BelgradeEvent implements Serializable {
     public void setFiles(List<BelgradeEventFile> files) {
         this.files = files;
     }
-    
-    
+
+    public List<Category> getCategories() {
+        return categories;
+    }
+
+    public void setCategories(List<Category> categories) {
+        this.categories = categories;
+    }
     
     @Override
     public String toString() {

@@ -1,13 +1,25 @@
-package beans;
+package db;
 
 import java.io.Serializable;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 /**
  *
  * @author Dragan
  */
+
+@Entity
+@Table(name="locations")
 public class BelgradeEventLocation implements Serializable {
     
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(nullable=false, unique=true)
     private int id = 0;
     
     private String title = "";
@@ -51,6 +63,17 @@ public class BelgradeEventLocation implements Serializable {
     public String toString() {
         return title;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof BelgradeEventLocation) {
+            if (((BelgradeEventLocation)obj).getTitle().equals(title))
+                return true;
+        } 
+        
+        return false;
+    }
+    
     
     
 }

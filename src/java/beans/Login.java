@@ -4,6 +4,8 @@
  */
 package beans;
 
+import db.DbFactory;
+import db.User;
 import java.io.IOException;
 import java.io.Serializable;
 import java.sql.Connection;
@@ -12,10 +14,13 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.List;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
+import org.hibernate.Query;
+import org.hibernate.Session;
 
 /**
  *
@@ -29,6 +34,133 @@ public class Login implements Serializable {
     private String tempPass = "";
     private String tempPass2 = "";
     private boolean changePassword = false;
+    
+    private Session session = null;
+
+    public String checkLogin() throws IOException {
+
+        session = DbFactory.getFactory().openSession();
+        
+        session.beginTransaction();
+        
+        Query query = session.createQuery("from User where username=:u and password=:p");
+        query.setParameter("u", user.getUsername());
+        query.setParameter("p", user.getPassword());
+        
+        List<User> users = query.list();
+        
+        if (!users.isEmpty()) {
+            
+            user = users.get(0);
+            
+            if (!user.isStatus()){
+                FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Administrator Vam jos uvek nije omogucio pristup!"));
+            } else {
+                if (user.isBlocked()) {
+                    FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Blokirani ste zbog tri nerealizovane rezervacije!"));
+                } else {
+                    String sqlQuery = "select count(*) from reservations where realized=0 and adminapproval=0 "
+                                + "and user='" + user.getUsername() + "' and expirationdate<=curdate()";
+                    
+                    query = session.createSQLQuery(sqlQuery);
+                    
+                    List<java.math.BigInteger> counts = query.list();
+                    
+                    if (!counts.isEmpty()) {
+                        
+                        if (counts.get(0).intValue() >= 3) {
+                            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Blokirani ste zbog tri nerealizovane rezervacije!"));
+
+                            user.setBlocked(true);
+                            
+                            session.update(user);
+                            
+                            session.getTransaction().commit();
+                            
+                            session.close();
+
+                            return null;
+                        }
+                        
+                    }
+                    
+                    user.setLastlogin(new Timestamp(new Date().getTime()));
+                    user.setLogged(true);
+                    
+                    session.update(user);
+                    
+                    session.getTransaction().commit();
+                    
+                    session.close();
+                    
+                    return "index?faces-redirect=true";
+                    
+                }
+            }
+            
+        } else {
+            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Neispravni podaci!"));
+        }
+        
+        session.close();
+        
+        return null;
+    }
+
+    public String changeLoginData() {
+        
+        session = DbFactory.getFactory().openSession();
+        
+        session.beginTransaction();
+        
+        Query query = session.createQuery("from User where username=:u and password=:p");
+        query.setParameter("u", user.getUsername());
+        query.setParameter("p", user.getPassword());
+
+        List<User> users = query.list();
+        
+        if (!users.isEmpty()) {
+             
+            User user = users.get(0);
+            
+            if (!user.isStatus()) {
+                
+                session.close();
+                FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Administrator Vam jos uvek nije omogucio pristup"));
+
+            } else {
+                
+                user.setPassword(this.user.getPassword2());
+                user.setPassword2(this.user.getPassword2());
+                
+                this.user = user;
+                
+                session.update(this.user);
+                
+                session.getTransaction().commit();
+                session.close();
+                
+                return "index?faces-redirect=true";
+            }
+            
+        } else {
+            
+            session.close();
+            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Neispravni podaci!"));
+        }
+        
+        return null;
+        
+    }
+
+    public String logout() {
+        FacesContext.getCurrentInstance().getExternalContext().invalidateSession();
+        return "/faces/index?faces-redirect=true";
+    }
+
+    public void changeData() {
+
+    }
 
     public String getTempPass() {
         return tempPass;
@@ -52,169 +184,6 @@ public class Login implements Serializable {
 
     public void setUser(User user) {
         this.user = user;
-    }
-
-    public String checkLogin() throws IOException {
-
-        FacesContext context = FacesContext.getCurrentInstance();
-
-        Connection con = null;
-        Statement st = null;
-        ResultSet rs = null;
-
-        try {
-
-            Class.forName("com.mysql.jdbc.Driver");
-
-            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/piaprojekat", "root", "");
-
-            st = con.createStatement();
-            String query = "select * from users where username='" + user.getUsername() + "' and password='" + user.getPassword() + "'";
-
-            rs = st.executeQuery(query);
-
-            if (rs.next()) {
-
-                user.setId(rs.getInt("id"));
-                user.setPassword2(rs.getString("password2"));
-                user.setFirstName(rs.getString("firstname"));
-                user.setLastName(rs.getString("lastname"));
-                user.setEmail(rs.getString("email"));
-                user.setTelephone(rs.getString("telephone"));
-                user.setAddress(rs.getString("address"));
-                user.setCity(rs.getString("city"));
-                user.setType(rs.getInt("type"));
-                user.setStatus(rs.getBoolean("status"));
-                user.setBlocked(rs.getBoolean("blocked"));
-
-                Timestamp loginDate = new Timestamp((new Date()).getTime());
-
-                user.setRegistered(rs.getTimestamp("registered"));
-
-                if (!user.isStatus()) {
-
-                    FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Administrator Vam jos uvek nije omogucio pristup!"));
-
-                } else {
-
-                    if (user.isBlocked()) {
-
-                        FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Blokirani ste zbog tri nerealizovane rezervacije!"));
-
-                    } else {
-
-                        query = "select count(*) from reservations where realized=0 and adminapproval=0 "
-                                + "and user='" + user.getUsername() + "' and expirationdate<=curdate()";
-
-                        ResultSet rs2 = st.executeQuery(query);
-
-                        if (rs2.next()) {
-                            if (rs2.getInt(1) >= 3) {
-
-                                FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Blokirani ste zbog tri nerealizovane rezervacije!"));
-
-                                query = "update users set blocked=1 where username='" + user.getUsername() + "'";
-
-                                st.executeUpdate(query);
-
-                                return null;
-
-                            }
-                        }
-
-                        rs2.close();
-                        
-                        user.setLastlogin(loginDate);
-                
-                        user.setLogged(true);
-
-                        query = "update users set lastlogin='" + loginDate + "' where username='" + user.getUsername() + "'";
-
-                        st.executeUpdate(query);
-
-                        return "index?faces-redirect=true";
-
-                    }
-
-                }
-            } else {
-
-                context.addMessage(null, new FacesMessage("Neispravni podaci!"));
-            }
-
-            rs.close();
-            st.close();
-            con.close();
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-        }
-
-        return null;
-    }
-
-    public String changeLoginData() {
-
-        FacesContext context = FacesContext.getCurrentInstance();
-
-        Connection con = null;
-        Statement st = null;
-        ResultSet rs = null;
-
-        try {
-
-            Class.forName("com.mysql.jdbc.Driver");
-
-            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/piaprojekat", "root", "");
-
-            st = con.createStatement();
-            String query = "select * from users where username='" + user.getUsername() + "' and password='" + user.getPassword() + "'";
-
-            rs = st.executeQuery(query);
-
-            if (rs.next()) {
-
-                if (!rs.getBoolean("status")) {
-
-                    FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Administrator Vam jos uvek nije omogucio pristup"));
-
-                } else {
-
-                    query = "update users set password='" + user.getPassword2() + "', password2='" + user.getPassword2()
-                            + "' where username='" + user.getUsername() + "'";
-
-                    st.executeUpdate(query);
-
-                    return "index?faces-redirect=true";
-
-                }
-            } else {
-
-                context.addMessage(null, new FacesMessage("Neispravni podaci!"));
-            }
-
-            rs.close();
-            st.close();
-            con.close();
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-        }
-
-        return null;
-    }
-
-    public String logout() {
-        FacesContext.getCurrentInstance().getExternalContext().invalidateSession();
-        return "/faces/index?faces-redirect=true";
-    }
-
-    public void changeData() {
-
     }
 
     public boolean isChangePassword() {

@@ -4,6 +4,14 @@
  */
 package beans;
 
+import db.BelgradeEventFile;
+import db.CategortyAndCards;
+import db.BelgradeEvent;
+import db.Message;
+import db.Category;
+import db.CommentGrade;
+import db.BelgradeEventLocation;
+import db.Reservation;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -205,7 +213,7 @@ public class Search implements Serializable {
 
                 category.setId(rs.getInt("id"));
                 category.setName(rs.getString("name"));
-                category.setSize(rs.getInt("size"));
+                category.setNumber(rs.getInt("number"));
                 category.setTicketPrice(rs.getInt("price"));
                 category.setSoldTickets(rs.getInt("sold"));
 
@@ -288,11 +296,11 @@ public class Search implements Serializable {
                 reservation.setId(rs.getInt("r.id"));
                 reservation.setUser(rs.getString("r.user"));
                 reservation.setTickets(rs.getInt("r.tickets"));
-                reservation.setEventid(rs.getInt("r.eventid"));
-                reservation.setEventTitle(rs.getString("e.title"));
-                reservation.setEventDate(rs.getTimestamp("e.date"));
-                reservation.setLocationid(rs.getInt("locationid"));
-                reservation.setLocationTitle(rs.getString("l.title"));
+                reservation.getEvent().setId(rs.getInt("r.eventid"));
+                reservation.getEvent().setTitle(rs.getString("e.title"));
+                reservation.getEvent().setDate(rs.getTimestamp("e.date"));
+                reservation.getEvent().getLocation().setId(rs.getInt("locationid"));
+                reservation.getEvent().getLocation().setTitle(rs.getString("l.title"));
                 reservation.setExpirationDate(rs.getTimestamp("r.expirationDate"));
                 reservation.setRealized(rs.getBoolean("r.realized"));
 
@@ -572,7 +580,7 @@ public class Search implements Serializable {
         userComments.clear();
 
         for (Reservation r : boughtTickets) {
-            if (r.getEventDate().before(new Date())) {
+            if (r.getEvent().getDate().before(new Date())) {
                 commentsEnabledEvents.add(r);
             }
         }

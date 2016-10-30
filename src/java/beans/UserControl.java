@@ -1,19 +1,25 @@
 package beans;
 
+import model.LocationModel;
+import db.User;
+import db.BelgradeEventLocation;
 import static beans.Registration.isValidEmailAddress;
+import db.Cashier;
+import db.DbFactory;
+import db.Reservation;
 import java.io.Serializable;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
-import javax.faces.component.UIInput;
 import javax.faces.context.FacesContext;
 import javax.faces.event.AjaxBehaviorEvent;
+import javax.faces.model.SelectItem;
+import model.UserModel;
+import org.hibernate.Query;
+import org.hibernate.Session;
 
 /**
  *
@@ -29,7 +35,8 @@ public class UserControl implements Serializable {
     
     private List<BelgradeEventLocation> locations = new LinkedList<>();
     
-    private UserModel model;
+    private UserModel userModel;
+    private LocationModel locationModel;
     
     private User selectedUser = new User();
   
@@ -41,346 +48,196 @@ public class UserControl implements Serializable {
     
     private BelgradeEventLocation newLocation = new BelgradeEventLocation();
     
+    private Session session = null;
+    
+    private String selectedItem = "";
+    private HashMap<String, BelgradeEventLocation> mapedLocations = new HashMap<>();
+    private List<SelectItem> selectedItems = new LinkedList<>();
+    
     public void gatherApprovalData() {
         
         waitingForApproval.clear();
         
-        Connection con = null;
-        Statement st = null;
-        ResultSet rs = null;
-
-        try {
-
-            Class.forName("com.mysql.jdbc.Driver");
-
-            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/piaprojekat", "root", "");
-
-            st = con.createStatement();
-
-            String query = "select * from users where status=0";
-            
-            rs = st.executeQuery(query);
-
-            while (rs.next()) {
-
-                User user = new User();
-
-                user.setUsername(rs.getString("username"));
-                user.setPassword(rs.getString("password"));
-                user.setPassword2(rs.getString("password2"));
-                user.setFirstName(rs.getString("firstname"));
-                user.setLastName(rs.getString("lastname"));
-                user.setEmail(rs.getString("email"));
-                user.setTelephone(rs.getString("telephone"));
-                user.setAddress(rs.getString("address"));
-                user.setCity(rs.getString("city"));
-                user.setType(rs.getInt("type"));
-                user.setStatus(rs.getBoolean("status"));
-                user.setBlocked(rs.getBoolean("blocked"));
-                user.setLastlogin(rs.getTimestamp("lastlogin"));
-                user.setRegistered(rs.getTimestamp("registered"));
-
-                waitingForApproval.add(user);
-                
-                model = new UserModel(waitingForApproval);
-            }
-
-            rs.close();
-            st.close();
-            con.close();
-
-        } catch (Exception e) {
-            e.printStackTrace();
+        session = DbFactory.getFactory().openSession();
+        
+        session.beginTransaction();
+        Query query = session.createQuery("from User where status=0");
+        
+        List<User> users = query.list();
+        
+        for (User u : users) {
+            waitingForApproval.add(u);
         }
-    
+        
+        session.close();
+        
+        userModel = new UserModel(waitingForApproval);
+        
     }
     
     public void gatherBlockedData() {
         
         blocked.clear();
         
-        Connection con = null;
-        Statement st = null;
-        ResultSet rs = null;
-
-        try {
-
-            Class.forName("com.mysql.jdbc.Driver");
-
-            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/piaprojekat", "root", "");
-
-            st = con.createStatement();
-
-            String query = "select * from users where blocked=1";
-            rs = st.executeQuery(query);
-
-            while (rs.next()) {
-
-                User user = new User();
-
-                user.setUsername(rs.getString("username"));
-                user.setPassword(rs.getString("password"));
-                user.setPassword2(rs.getString("password2"));
-                user.setFirstName(rs.getString("firstname"));
-                user.setLastName(rs.getString("lastname"));
-                user.setEmail(rs.getString("email"));
-                user.setTelephone(rs.getString("telephone"));
-                user.setAddress(rs.getString("address"));
-                user.setCity(rs.getString("city"));
-                user.setType(rs.getInt("type"));
-                user.setStatus(rs.getBoolean("status"));
-                user.setBlocked(rs.getBoolean("blocked"));
-                user.setLastlogin(rs.getTimestamp("lastlogin"));
-                user.setRegistered(rs.getTimestamp("registered"));
-
-                blocked.add(user);
-                
-                model = new UserModel(blocked);
-                
-            }
-
-            rs.close();
-            st.close();
-            con.close();
-
-        } catch (Exception e) {
-            e.printStackTrace();
+        session = DbFactory.getFactory().openSession();
+        
+        session.beginTransaction();
+        Query query = session.createQuery("from User where blocked=1");
+        
+        List<User> users = query.list();
+        
+        for (User u : users) {
+            blocked.add(u);
         }
+        
+        userModel = new UserModel(blocked);
+        
+        session.close();
     }
     
     public void gatherAllUsersData() {
 
         allUsers.clear();
         
-        Connection con = null;
-        Statement st = null;
-        ResultSet rs = null;
-
-        try {
-
-            Class.forName("com.mysql.jdbc.Driver");
-
-            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/piaprojekat", "root", "");
-
-            st = con.createStatement();
-
-            String query = "select * from users";
-            rs = st.executeQuery(query);
-
-            while (rs.next()) {
-
-                User user = new User();
-
-                user.setUsername(rs.getString("username"));
-                user.setPassword(rs.getString("password"));
-                user.setPassword2(rs.getString("password2"));
-                user.setFirstName(rs.getString("firstname"));
-                user.setLastName(rs.getString("lastname"));
-                user.setEmail(rs.getString("email"));
-                user.setTelephone(rs.getString("telephone"));
-                user.setAddress(rs.getString("address"));
-                user.setCity(rs.getString("city"));
-                user.setType(rs.getInt("type"));
-                user.setStatus(rs.getBoolean("status"));
-                user.setBlocked(rs.getBoolean("blocked"));
-                user.setLastlogin(rs.getTimestamp("lastlogin"));
-                user.setRegistered(rs.getTimestamp("registered"));
-
-                allUsers.add(user);
-                
-                model = new UserModel(allUsers);
-            }
-
-            rs.close();
-            st.close();
-            con.close();
-
-        } catch (Exception e) {
-            e.printStackTrace();
+        session = DbFactory.getFactory().openSession();
+        
+        session.beginTransaction();
+        Query query = session.createQuery("from User");
+        
+        List<User> users = query.list();
+        
+        for (User u : users) {
+            allUsers.add(u);
         }
+        
+        userModel = new UserModel(allUsers);
+        
+        session.close();
 
     }
     
     public void gatherEventLocations() {
         
         locations.clear();
+        mapedLocations.clear();
+        selectedItems.clear();
         
-        Connection con = null;
-        Statement st = null;
-        ResultSet rs = null;
-
-        try {
-
-            Class.forName("com.mysql.jdbc.Driver");
-
-            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/piaprojekat", "root", "");
-
-            st = con.createStatement();
-
-            String query = "select * from locations";
-            rs = st.executeQuery(query);
-
-            while (rs.next()) {
-
-                BelgradeEventLocation location = new BelgradeEventLocation();
-
-                location.setTitle(rs.getString("title"));
-                location.setAddress(rs.getString("address"));
-                location.setCapacity(rs.getInt("capacity"));
-                
-                locations.add(location);
-                
-            }
-
-            rs.close();
-            st.close();
-            con.close();
-
-        } catch (Exception e) {
-            e.printStackTrace();
+        session = DbFactory.getFactory().openSession();
+        
+        session.beginTransaction();
+        
+        Query query = session.createQuery("from BelgradeEventLocation");
+        
+        List<BelgradeEventLocation> eventLocations = query.list();
+        
+        for (BelgradeEventLocation bel : eventLocations) {
+            locations.add(bel);
+        
+            mapedLocations.put(bel.getTitle(), bel);
+            selectedItems.add(new SelectItem(bel, bel.getTitle()));
         }
+        
+        if (!selectedItems.isEmpty()) {
+            selectedItem = selectedItems.get(0).getLabel();
+            selectedLocation = (BelgradeEventLocation) selectedItems.get(0).getValue();
+        } 
+        
+        session.close();
+        
+        locationModel = new LocationModel(locations);
     
     }
 
-    public void approveUser(User user) {
+    public void approveSelectedUser() {
 
-        waitingForApproval.remove(user);
+        waitingForApproval.remove(selectedUser);
 
-        Connection con = null;
-        Statement st = null;
-       
-        try {
-
-            Class.forName("com.mysql.jdbc.Driver");
-
-            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/piaprojekat", "root", "");
-
-            st = con.createStatement();
-
-            String query = "update users set status=1 where username='" + user.getUsername() + "'";
-          
-            st.executeUpdate(query);
-            
-            st.close();
-            con.close();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
+        session = DbFactory.getFactory().openSession();
+        
+        session.beginTransaction();
+        
+        selectedUser.setStatus(true);
+        
+        session.update(selectedUser);
+        
+        session.getTransaction().commit();
+        
+        userModel = new UserModel(waitingForApproval);
+        
+        session.close();
     }
 
-    public void deleteUser(User user) {
+    public void deleteSelectedUser(int type) {
+    
+        session = DbFactory.getFactory().openSession();
         
-        waitingForApproval.remove(user);
+        session.beginTransaction();
         
-        Connection con = null;
-        Statement st = null;
-       
-        try {
-
-            Class.forName("com.mysql.jdbc.Driver");
-
-            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/piaprojekat", "root", "");
-
-            st = con.createStatement();
-
-            String query = "delete from users where username='" + user.getUsername() + "'";
-          
-            st.executeUpdate(query);
-            
-            st.close();
-            con.close();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    
-    }
-    
-    public void deleteSelectedUser() {
-    
-        Connection con = null;
-        Statement st = null;
-       
-        try {
-
-            Class.forName("com.mysql.jdbc.Driver");
-
-            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/piaprojekat", "root", "");
-
-            st = con.createStatement();
-
-            String query = "delete from users where username='" + selectedUser.getUsername() + "'";
-          
-            st.executeUpdate(query);
-            
-            st.close();
-            con.close();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    
-    }
-    
-    public void deblock(User user) {
+        session.delete(selectedUser);
         
-        blocked.remove(user);
-
-        Connection con = null;
-        Statement st = null;
-        ResultSet rs = null;
-       
-        try {
-
-            Class.forName("com.mysql.jdbc.Driver");
-
-            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/piaprojekat", "root", "");
-
-            st = con.createStatement();
-
-            String query = "update users set blocked=0 where username='" + user.getUsername() + "'";
-          
-            st.executeUpdate(query);
-            
-            query = "update reservations set adminapproval=1, realized=1 where realized=0 and adminapproval=0 and user='"
-                    + user.getUsername() + "'";
-            
-            st.executeUpdate(query);
-            
-            st.close();
-            con.close();
-
-        } catch (Exception e) {
-            e.printStackTrace();
+        session.getTransaction().commit();
+        
+        session.close();
+        
+        gatherAllUsersData();
+        gatherApprovalData();
+        gatherBlockedData();
+        
+        switch (type) {
+            case 0: userModel = new UserModel(waitingForApproval);
+                    break;
+            case 1: userModel = new UserModel(blocked);
+                    break;
+            default:
+                    userModel = new UserModel(allUsers);
+                    break;
         }
         
     }
     
-    public void updateUserData() {
+    public void deblockSelectedUser() {
+        
+        blocked.remove(selectedUser);
+        
+        session = DbFactory.getFactory().openSession();
+        
+        session.beginTransaction();
+        
+        selectedUser.setBlocked(false);
+        
+        session.update(selectedUser);
+        
+        Query query = session.createQuery("from Reservation where user=:u and realized=0 and expirationdate < curdate()");
+        query.setParameter("u", selectedUser.getUsername());
+        
+        List<Reservation> res = query.list();
+        
+        for (Reservation r : res) {
+            r.setAdminapproval(true);
+            
+            session.update(r);
+        }
+        
+        session.getTransaction().commit();
+        
+        session.close();
+
+        userModel = new UserModel(blocked);
+    }
+    
+    public void updateSelectedUserData() {
  
-        Connection con = null;
-        Statement st = null;
-       
-        try {
-
-            Class.forName("com.mysql.jdbc.Driver");
-
-            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/piaprojekat", "root", "");
-
-            st = con.createStatement();
-
-            String query = "update users set type='" + selectedUser.getType() + "'";
-          
-            st.executeUpdate(query);
-            
-            st.close();
-            con.close();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        session = DbFactory.getFactory().openSession();
+        
+        session.beginTransaction();
+        
+        session.update(selectedUser);
+        
+        session.getTransaction().commit();
+        
+        session.close();
+        
+        gatherAllUsersData();
  
     }
     
@@ -389,85 +246,44 @@ public class UserControl implements Serializable {
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Email adresa nije ispravna", ""));
             return null;
         }
-
-        Connection con = null;
-        Statement st = null;
-        ResultSet rs = null;
-
-        try {
-
-            Class.forName("com.mysql.jdbc.Driver");
-
-            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/piaprojekat", "root", "");
-
-            st = con.createStatement();
+        
+        session = DbFactory.getFactory().openSession();
+        
+        session.beginTransaction();
+        
+        Query query = session.createQuery("from User where username=:u or email=:e");
+        query.setParameter("u", newUser.getUsername());
+        query.setParameter("e", newUser.getEmail());
+        
+        List<User> users = query.list();
+        
+        if (!users.isEmpty()) {
             
-            String query = "select * from users where username='" + newUser.getUsername() + "' or email='" + newUser.getEmail() + "'";
+            session.close();
             
-            rs = st.executeQuery(query);
+            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Korisnicko ime i/ili email vec postoje"));
             
-            if (!rs.next()) {
-            
-                query = "insert into users(username, password, password2, firstname, lastname, email, telephone, address,"
-                        + " city, type, status, blocked, lastlogin, registered) "
-                        + "values('" + newUser.getUsername() + "','" + newUser.getPassword() + "','" + newUser.getPassword2() + "','"
-                        + newUser.getFirstName() + "','" + newUser.getLastName() + "','" + newUser.getEmail() + "','" + newUser.getTelephone() + "','"
-                        + newUser.getAddress() + "','" + newUser.getCity() + "'," + newUser.getType() + "," + true + ","
-                        + false + ",'" + newUser.getLastlogin() + "','" + newUser.getRegistered() + "')";
-
-                st.executeUpdate(query);
-                
-                if (newUser.getType() == 1) {
-                    
-                    ResultSet rs2 = null;
-                    
-                    query = "select id from users where username='" + newUser.getUsername() + "'";
-                    
-                    rs2 = st.executeQuery(query);
-                    
-                    if (rs2.next()) {
-                        
-                        ResultSet rs3 = null;
-                        
-                        int userid = rs2.getInt("id");
-                        
-                        query = "select id from locations where title='" + selectedLocation.getTitle() + "'";
-                        
-                        rs3 = st.executeQuery(query);
-                        
-                        if (rs3.next()) {
-                         
-                            int locationid = rs3.getInt("id");
-                            
-                            query = "insert into cachier(userid, locationid) values(" + userid + "," + locationid + ")";
-                        
-                            st.executeUpdate(query);
-                            
-                        }
-                        
-                        rs3.close();
-                        
-                    }
-                    
-                    rs2.close();
-                    
-                }
-                
-                
-            } else {
-                FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Korisnicko ime i/ili email vec postoje"));
-                return null;
-            }
-
-            rs.close();
-            st.close();
-            con.close();
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
+            return null;
         }
+        
+        newUser.setStatus(true);
+        
+        session.save(newUser);
+        
+        
+        if (newUser.getType() == 1) {
+            
+            Cashier c = new Cashier();
+            
+            c.setUser(newUser);
+            c.setLocation(selectedLocation);
+            
+            session.save(c);
+        }
+        
+        session.getTransaction().commit();
+        
+        session.close();
         
         return "usersOverview?faces-redirect=true";
 
@@ -475,44 +291,62 @@ public class UserControl implements Serializable {
     
     public void addLocation() {
         
-        Connection con = null;
-        Statement st = null;
-        ResultSet rs = null;
-
-        try {
-
-            Class.forName("com.mysql.jdbc.Driver");
-
-            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/piaprojekat", "root", "");
-
-            st = con.createStatement();
-            
-            String query = "select * from locations where title='" + newLocation.getTitle() + "'";
-            
-            rs = st.executeQuery(query);
-            
-            if (!rs.next()) {
-            
-                query = "insert into locations(title, address, capacity) "
-                        + "values('" + newLocation.getTitle() + "','" + newLocation.getAddress() + "'," 
-                        + newLocation.getCapacity() + ")";
-
-                st.executeUpdate(query);
-                
-            } else {
-                FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Lokacija vec postoji"));
-            }
-
-            rs.close();
-            st.close();
-            con.close();
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-        }
+        session = DbFactory.getFactory().openSession();
         
+        session.beginTransaction();
+        
+        Query query = session.createQuery("from BelgradeEventLocation where title=:t");
+        query.setParameter("t", newLocation.getTitle());
+        
+        List<BelgradeEventLocation> eventLocations = query.list();
+        
+        if (!eventLocations.isEmpty()) {
+        
+            session.close();
+            
+            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Lokacija vec postoji"));
+            
+        } else {
+            
+            session.save(newLocation);
+            
+            session.getTransaction().commit();
+        
+            session.close();
+            
+            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Lokacija je uspesno dodata!"));
+        }
+    }
+    
+    public void updateSelectedLocationData() {
+        
+        session = DbFactory.getFactory().openSession();
+        
+        session.beginTransaction();
+        
+        session.update(selectedLocation);
+        
+        session.getTransaction().commit();
+        
+        session.close();
+        
+        gatherEventLocations();
+    }
+    
+    public void deleteSelectedLocation() {
+        
+        session = DbFactory.getFactory().openSession();
+        
+        session.beginTransaction();
+        
+        session.delete(selectedLocation);
+        
+        session.getTransaction().commit();
+        
+        session.close();
+        
+        gatherEventLocations();
+    
     }
     
     public void onUserTypeChange(AjaxBehaviorEvent  e) {
@@ -546,14 +380,6 @@ public class UserControl implements Serializable {
 
     public void setAllUsers(List<User> allUsers) {
         this.allUsers = allUsers;
-    }
-
-    public UserModel getModel() {
-        return model;
-    }
-
-    public void setModel(UserModel model) {
-        this.model = model;
     }
 
     public User getSelectedUser() {
@@ -604,6 +430,46 @@ public class UserControl implements Serializable {
         this.isCashier = isCashier;
     }
 
-    
+    public UserModel getUserModel() {
+        return userModel;
+    }
+
+    public void setUserModel(UserModel userModel) {
+        this.userModel = userModel;
+    }
+
+    public LocationModel getLocationModel() {
+        return locationModel;
+    }
+
+    public void setLocationModel(LocationModel locationModel) {
+        this.locationModel = locationModel;
+    }
+
+    public String getSelectedItem() {
+        return selectedItem;
+    }
+
+    public void setSelectedItem(String selectedItem) {
+        this.selectedItem = selectedItem;
+        setSelectedLocation(mapedLocations.get(selectedItem));
+    }
+
+    public HashMap<String, BelgradeEventLocation> getMapedLocations() {
+        return mapedLocations;
+    }
+
+    public void setMapedLocations(HashMap<String, BelgradeEventLocation> mapedLocations) {
+        this.mapedLocations = mapedLocations;
+    }
+
+    public List<SelectItem> getSelectedItems() {
+        return selectedItems;
+    }
+
+    public void setSelectedItems(List<SelectItem> selectedItems) {
+        this.selectedItems = selectedItems;
+    }
+
     
 }

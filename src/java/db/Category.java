@@ -1,15 +1,28 @@
-package beans;
+package db;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 /**
  *
  * @author Dragan
  */
+
+@Entity
+@Table(name = "categories")
 public class Category {
     
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(nullable=false, unique=true)
     private int id = 0;
 
     private String name = "";
-    private int size = 0;
+    private int number = 0;
     private int ticketPrice = 0;
     
     private int soldTickets = 0;
@@ -22,12 +35,12 @@ public class Category {
         this.name = name;
     }
 
-    public int getSize() {
-        return size;
+    public int getNumber() {
+        return number;
     }
 
-    public void setSize(int size) {
-        this.size = size;
+    public void setNumber(int number) {
+        this.number = number;
     }
 
     public int getTicketPrice() {
